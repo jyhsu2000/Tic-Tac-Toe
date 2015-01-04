@@ -23,7 +23,8 @@ public class gamePanel extends JPanel implements MouseListener {
 	int[][] loc = new int[3][3];
 	int round = 0;
 	int who = 1;
-	boolean withAI = true;
+	boolean withAI = false;
+	boolean smartAI = false;
 
 	public gamePanel() {
 		//listener
@@ -321,5 +322,28 @@ public class gamePanel extends JPanel implements MouseListener {
 
 	static public void restart() {
 		getInstance().initialize();
+	}
+
+	static public boolean toggleAI() {
+		getInstance().withAI = !getInstance().withAI;
+		String status = "";
+		if (getInstance().withAI) {
+			status = "Player with AI";
+		} else {
+			status = "2 Players";
+		}
+		statusPanel.setStatus(status);
+		return getInstance().withAI;
+	}
+	static public boolean toggleSmartAI() {
+		getInstance().smartAI = !getInstance().smartAI;
+		String status = "";
+		if (getInstance().smartAI) {
+			status = "SmartAI turn on";
+		} else {
+			status = "SmartAI turn off";
+		}
+		statusPanel.setStatus(status);
+		return getInstance().smartAI;
 	}
 }
