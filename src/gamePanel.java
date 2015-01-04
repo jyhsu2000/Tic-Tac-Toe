@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Random;
 
 import javax.swing.JPanel;
 
@@ -302,22 +303,132 @@ public class gamePanel extends JPanel implements MouseListener {
 	}
 
 	private void AIClick() {
-		//random AI
-		//count empty grid
-		int emptyGridCount = 9 - round;
-		//random choose a grid
-		int choose = (int) (Math.random() * emptyGridCount);
-		int count = 0;
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				if (loc[i][j] == 0) {
-					if (choose == count) {
-						click(i, j);
+		boolean needRandomAI = false;
+		if (smartAI) {
+			//smart AI
+			String toWin = findLocationToWin(who);
+			String toDie = findLocationToWin(3 - who);
+			if (toWin.length() > 0) {
+				//going to win
+				int x = Integer.parseInt("" + toWin.charAt(0));
+				int y = Integer.parseInt("" + toWin.charAt(1));
+				click(x, y);
+			} else if (toDie.length() > 0) {
+				//going to win
+				int x = Integer.parseInt("" + toDie.charAt(0));
+				int y = Integer.parseInt("" + toDie.charAt(1));
+				click(x, y);
+			} else if (loc[1][1] == 0) {
+				//center first
+				click(1, 1);
+			} else if (loc[0][0] * loc[0][2] * loc[2][0] * loc[2][2] == 0) {
+				//corner
+				if (loc[0][0] + loc[0][2] + loc[2][0] + loc[2][2] == 0) {
+					//all corner empty
+					Random random = new Random();
+					int x = random.nextInt(2) * 2;
+					int y = random.nextInt(2) * 2;
+					click(x, y);
+				} else {
+					boolean ok = false;
+					int emptyCornerCount = 0;
+					//find best corner
+					for (int i = 0; i < 3; i += 2) {
+						for (int j = 0; j < 3; j += 2) {
+							if (loc[i][j] == 0) {
+								if (loc[2 - i][2 - j] == 3 - who) {
+									click(i, j);
+									ok = true;
+									break;
+								}
+								emptyCornerCount++;
+							}
+						}
+						if (ok) {
+							break;
+						}
 					}
-					count++;
+					if (!ok) {
+						//random corner
+						int count = 0;
+						Random random = new Random();
+						int choose = random.nextInt(emptyCornerCount);
+						for (int i = 0; i < 3; i += 2) {
+							for (int j = 0; j < 3; j += 2) {
+								if (loc[i][j] == 0) {
+									if (choose == count) {
+										click(i, j);
+									}
+									count++;
+								}
+							}
+						}
+					}
+				}
+			} else {
+				//other case
+				//use random AI
+				needRandomAI = true;
+			}
+		}
+		if (!smartAI || needRandomAI) {
+			//random AI
+			//count empty grid
+			int emptyGridCount = 9 - round;
+			//random choose a grid
+			Random random = new Random();
+			int choose = random.nextInt(emptyGridCount);
+			int count = 0;
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					if (loc[i][j] == 0) {
+						if (choose == count) {
+							click(i, j);
+						}
+						count++;
+					}
 				}
 			}
 		}
+	}
+
+	private String findLocationToWin(int whoToWin) {
+		String result = "";
+		for (int i = 0; i < 3; i++) {
+			//horizontal line
+			if (loc[0][i] == 0 && loc[1][i] * loc[2][i] == whoToWin * whoToWin) {
+				result = "0" + i;
+			} else if (loc[1][i] == 0 && loc[0][i] * loc[2][i] == whoToWin * whoToWin) {
+				result = "1" + i;
+			} else if (loc[2][i] == 0 && loc[0][i] * loc[1][i] == whoToWin * whoToWin) {
+				result = "2" + i;
+			}
+			//vertical line
+			if (loc[i][0] == 0 && loc[i][1] * loc[i][2] == whoToWin * whoToWin) {
+				result = i + "0";
+			} else if (loc[i][1] == 0 && loc[i][0] * loc[i][2] == whoToWin * whoToWin) {
+				result = i + "1";
+			} else if (loc[i][2] == 0 && loc[i][0] * loc[i][1] == whoToWin * whoToWin) {
+				result = i + "2";
+			}
+		}
+		//diagonal line
+		if (loc[0][0] == 0 && loc[1][1] * loc[2][2] == whoToWin * whoToWin) {
+			result = "00";
+		} else if (loc[1][1] == 0 && loc[0][0] * loc[2][2] == whoToWin * whoToWin) {
+			result = "11";
+		} else if (loc[2][2] == 0 && loc[0][0] * loc[1][1] == whoToWin * whoToWin) {
+			result = "22";
+		}
+		if (loc[0][2] == 0 && loc[1][1] * loc[2][0] == whoToWin * whoToWin) {
+			result = "02";
+		} else if (loc[1][1] == 0 && loc[0][2] * loc[2][0] == whoToWin * whoToWin) {
+			result = "11";
+		} else if (loc[2][0] == 0 && loc[0][2] * loc[1][1] == whoToWin * whoToWin) {
+			result = "20";
+		}
+		//System.out.println(result);
+		return result;
 	}
 
 	static public void restart() {
@@ -335,6 +446,7 @@ public class gamePanel extends JPanel implements MouseListener {
 		statusPanel.setStatus(status);
 		return getInstance().withAI;
 	}
+
 	static public boolean toggleSmartAI() {
 		getInstance().smartAI = !getInstance().smartAI;
 		String status = "";
