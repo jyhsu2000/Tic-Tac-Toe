@@ -45,7 +45,7 @@ public class Launcher {
 		JPanel sidePanel = new JPanel();
 		frame.getContentPane().add(sidePanel, BorderLayout.EAST);
 
-		JPanel bottomPanel = new JPanel();
+		JPanel bottomPanel = statusPanel.getInstance();
 		frame.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 	}
 

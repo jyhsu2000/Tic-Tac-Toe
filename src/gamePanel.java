@@ -1,10 +1,12 @@
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JPanel;
 
-public class gamePanel extends JPanel {
+public class gamePanel extends JPanel implements MouseListener {
 	private static final long serialVersionUID = 1L;
 	private static gamePanel instance;
 	int size = 500;
@@ -13,6 +15,7 @@ public class gamePanel extends JPanel {
 	int padding = 20;
 
 	public gamePanel() {
+		addMouseListener(this);
 	}
 
 	static public gamePanel getInstance() {
@@ -33,5 +36,31 @@ public class gamePanel extends JPanel {
 		//vertical line
 		g2.drawLine(left + size / 3, top + padding, left + size / 3, top + size - padding);
 		g2.drawLine(left + size / 3 * 2, top + padding, left + size / 3 * 2, top + size - padding);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		String status = e.getX() + " , " + e.getY();
+		statusPanel.setStatus(status);
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+
 	}
 }
