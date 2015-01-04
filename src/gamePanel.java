@@ -6,12 +6,20 @@ import javax.swing.JPanel;
 
 public class gamePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
+	private static gamePanel instance;
 	int size = 500;
 	int left = 50;
 	int top = 25;
 	int padding = 20;
 
 	public gamePanel() {
+	}
+
+	static public gamePanel getInstance() {
+		if (instance == null) {
+			instance = new gamePanel();
+		}
+		return instance;
 	}
 
 	public void paint(Graphics g) {

@@ -39,7 +39,7 @@ public class Launcher {
 		frame.setResizable(false);
 		frame.setTitle("Tic Tac Toe");
 
-		JPanel mainPanel = new gamePanel();
+		JPanel mainPanel = gamePanel.getInstance();
 		frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 
 		JPanel sidePanel = new JPanel();
