@@ -23,6 +23,7 @@ public class gamePanel extends JPanel implements MouseListener {
 	int[][] loc = new int[3][3];
 	int round = 0;
 	int who = 1;
+	boolean withAI = true;
 
 	public gamePanel() {
 		//listener
@@ -141,7 +142,11 @@ public class gamePanel extends JPanel implements MouseListener {
 			return;
 		}
 		//call click
-		click(x, y);
+		boolean r = click(x, y);
+		//with AI
+		if (who != 0 && withAI && r) {
+			AIClick();
+		}
 		//repaint
 		repaint();
 	}
@@ -246,15 +251,17 @@ public class gamePanel extends JPanel implements MouseListener {
 		return locY;
 	}
 
-	private void click(int x, int y) {
+	private boolean click(int x, int y) {
+		boolean result = false;
 		String status = "";
 		String location = findLocation(x, y);
 		//check if in area
 		if (x == -1 || y == -1) {
-			return;
+			return false;
 		}
 		//check if empty
 		if (loc[x][y] == 0) {
+			//update data of grid
 			loc[x][y] = who;
 			//check if win
 			boolean isWinner = false;
@@ -283,11 +290,33 @@ public class gamePanel extends JPanel implements MouseListener {
 				who = 3 - who;
 				round++;
 			}
+			result = true;
 		} else {
 			status = "There is already something at " + location;
+			result = false;
 		}
 		//update status
 		statusPanel.setStatus(status);
+		return result;
+	}
+
+	private void AIClick() {
+		//random AI
+		//count empty grid
+		int emptyGridCount = 9 - round;
+		//random choose a grid
+		int choose = (int) (Math.random() * emptyGridCount);
+		int count = 0;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (loc[i][j] == 0) {
+					if (choose == count) {
+						click(i, j);
+					}
+					count++;
+				}
+			}
+		}
 	}
 
 	static public void restart() {
