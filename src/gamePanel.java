@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 public class gamePanel extends JPanel implements MouseListener {
 	private static final long serialVersionUID = 1L;
 	private static gamePanel instance;
+	//config
 	int size = 500;
 	int gridSize = size / 3;
 	int left = 50;
@@ -18,7 +19,10 @@ public class gamePanel extends JPanel implements MouseListener {
 	int radius = 40;
 	int normalLineWidth = 10;
 	int boldLineWidth = 20;
+	//game variable
 	int[][] loc = new int[3][3];
+	int round = 0;
+	int who = 1;
 
 	public gamePanel() {
 		//listener
@@ -125,22 +129,21 @@ public class gamePanel extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		String status = findLocation(e.getX(), e.getY());
+		//check if in game
+		if (who == 0) {
+			//statusPanel.setStatus("Game is already over");
+			return;
+		}
 		int x = findLocX(e.getX());
 		int y = findLocY(e.getY());
 		//check if in area
 		if (x == -1 || y == -1) {
 			return;
 		}
-		//FIXME change
-		loc[x][y]++;
-		if (loc[x][y] == 3) {
-			loc[x][y] = 0;
-		}
+		//call click
+		click(x, y);
 		//repaint
 		repaint();
-		//update status
-		statusPanel.setStatus(status);
 	}
 
 	@Override
@@ -164,22 +167,26 @@ public class gamePanel extends JPanel implements MouseListener {
 	}
 
 	private void initialize() {
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
+		round = 0;
+		who = 1;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
 				loc[i][j] = 0;
 			}
 		}
+		repaint();
+		statusPanel.setStatus("");
 	}
 
 	private String findLocation(int x, int y) {
 		String strX = "";
 		String strY = "";
 		//check if in area
-		if (findLocX(x) == -1 || findLocY(y) == -1) {
+		if (x == -1 || y == -1) {
 			return "";
 		}
 		//horizontal location
-		switch (findLocX(x)) {
+		switch (x) {
 		case 0:
 			strX = "left";
 			break;
@@ -191,7 +198,7 @@ public class gamePanel extends JPanel implements MouseListener {
 			break;
 		}
 		//vertical location
-		switch (findLocY(y)) {
+		switch (y) {
 		case 0:
 			strY = "top";
 			break;
@@ -237,5 +244,53 @@ public class gamePanel extends JPanel implements MouseListener {
 			locY = 1;
 		}
 		return locY;
+	}
+
+	private void click(int x, int y) {
+		String status = "";
+		String location = findLocation(x, y);
+		//check if in area
+		if (x == -1 || y == -1) {
+			return;
+		}
+		//check if empty
+		if (loc[x][y] == 0) {
+			loc[x][y] = who;
+			//check if win
+			boolean isWinner = false;
+			int winNum = who * who * who;
+			for (int i = 0; i < 3; i++) {
+				if (loc[0][i] * loc[1][i] * loc[2][i] == winNum) {
+					isWinner = true;
+				} else if (loc[i][0] * loc[i][1] * loc[i][2] == winNum) {
+					isWinner = true;
+				}
+			}
+			if (loc[0][0] * loc[1][1] * loc[2][2] == winNum) {
+				isWinner = true;
+			} else if (loc[0][2] * loc[1][1] * loc[2][0] == winNum) {
+				isWinner = true;
+			}
+			//game over
+			if (isWinner) {
+				status = "Winner is Player " + who;
+				who = 0;
+			} else if (round == 8) {
+				status = "Drew!!";
+				who = 0;
+			} else {
+				//next turn
+				who = 3 - who;
+				round++;
+			}
+		} else {
+			status = "There is already something at " + location;
+		}
+		//update status
+		statusPanel.setStatus(status);
+	}
+
+	static public void restart() {
+		getInstance().initialize();
 	}
 }
