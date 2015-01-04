@@ -285,7 +285,7 @@ public class gamePanel extends JPanel implements MouseListener {
 				status = "Winner is Player " + who;
 				who = 0;
 			} else if (round == 8) {
-				status = "Drew!!";
+				status = "Draw Game!!";
 				who = 0;
 			} else {
 				//next turn
