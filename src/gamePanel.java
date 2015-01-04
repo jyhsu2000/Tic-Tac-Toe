@@ -1,4 +1,5 @@
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -14,7 +15,10 @@ public class gamePanel extends JPanel implements MouseListener {
 	int left = 50;
 	int top = 25;
 	int padding = 20;
-	int[][] loc = new int[2][2];
+	int radius = 40;
+	int normalLineWidth = 10;
+	int boldLineWidth = 20;
+	int[][] loc = new int[3][3];
 
 	public gamePanel() {
 		//listener
@@ -32,7 +36,10 @@ public class gamePanel extends JPanel implements MouseListener {
 
 	public void paint(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setStroke(new BasicStroke(10, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g2.setColor(getBackground());
+		g2.fillRect(0, 0, getWidth(), getHeight());
+		g2.setColor(getForeground());
+		g2.setStroke(new BasicStroke(normalLineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 		//border
 		g2.drawRect(left, top, size, size);
 		//horizontal line
@@ -41,11 +48,98 @@ public class gamePanel extends JPanel implements MouseListener {
 		//vertical line
 		g2.drawLine(left + gridSize, top + padding, left + gridSize, top + size - padding);
 		g2.drawLine(left + gridSize * 2, top + padding, left + gridSize * 2, top + size - padding);
+		//draw O and X
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (loc[i][j] == 1) {
+					//draw O
+					int startX = (int) (left + gridSize * (i + 0.5) - radius);
+					int startY = (int) (top + gridSize * (j + 0.5) - radius);
+					g2.setColor(Color.BLUE);
+					g2.drawOval(startX, startY, radius * 2, radius * 2);
+				} else if (loc[i][j] == 2) {
+					//draw X
+					int startX = (int) (left + gridSize * (i + 0.5) - radius);
+					int startY = (int) (top + gridSize * (j + 0.5) - radius);
+					g2.setColor(Color.RED);
+					g2.drawLine(startX, startY, startX + radius * 2, startY + radius * 2);
+					g2.drawLine(startX, startY + radius * 2, startX + radius * 2, startY);
+
+				}
+			}
+		}
+		//draw line cross symbol
+		//horizontal line
+		for (int i = 0; i < 3; i++) {
+			int n = loc[i][0] * loc[i][1] * loc[i][2];
+			if (n == 1 | n == 8) {
+				g2.setStroke(new BasicStroke(boldLineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				if (n == 1) {
+					g2.setColor(Color.BLUE);
+				} else {
+					g2.setColor(Color.RED);
+				}
+				int startX = (int) (left + gridSize * (i + 0.5));
+				g2.drawLine(startX, top + padding, startX, top + size - padding);
+			}
+		}
+		//vertical line
+		for (int i = 0; i < 3; i++) {
+			int n = loc[0][i] * loc[1][i] * loc[2][i];
+			if (n == 1 | n == 8) {
+				g2.setStroke(new BasicStroke(boldLineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				if (n == 1) {
+					g2.setColor(Color.BLUE);
+				} else {
+					g2.setColor(Color.RED);
+				}
+				int startY = (int) (top + gridSize * (i + 0.5));
+				g2.drawLine(left + padding, startY, left + size - padding, startY);
+			}
+		}
+		//diagonal line
+		//top-left to bottom-right
+		int n1 = loc[0][0] * loc[1][1] * loc[2][2];
+		if (n1 == 1 | n1 == 8) {
+			g2.setStroke(new BasicStroke(boldLineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			if (n1 == 1) {
+				g2.setColor(Color.BLUE);
+			} else {
+				g2.setColor(Color.RED);
+			}
+			g2.drawLine(left + padding, top + padding, left + size - padding, top + size - padding);
+		}
+		//top-right to bottom-left
+		int n2 = loc[0][2] * loc[1][1] * loc[2][0];
+		if (n2 == 1 | n2 == 8) {
+			g2.setStroke(new BasicStroke(boldLineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			if (n2 == 1) {
+				g2.setColor(Color.BLUE);
+			} else {
+				g2.setColor(Color.RED);
+			}
+			g2.drawLine(left + padding, top + size - padding, left + size - padding, top + padding);
+		}
+
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		String status = findLocation(e.getX(), e.getY());
+		int x = findLocX(e.getX());
+		int y = findLocY(e.getY());
+		//check if in area
+		if (x == -1 || y == -1) {
+			return;
+		}
+		//FIXME change
+		loc[x][y]++;
+		if (loc[x][y] == 3) {
+			loc[x][y] = 0;
+		}
+		//repaint
+		repaint();
+		//update status
 		statusPanel.setStatus(status);
 	}
 
