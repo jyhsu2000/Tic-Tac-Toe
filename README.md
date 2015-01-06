@@ -1,4 +1,4 @@
-Tic-Tac-Toe
+Tic-Tac-Toe (with AI)
 ===========
 
 Just a small game  
